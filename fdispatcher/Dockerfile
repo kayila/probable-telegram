@@ -14,4 +14,4 @@ COPY --from=build /tmp/work/build/* /usr/local/bin
 
 #HEALTHCHECK 
 
-CMD probable-telegram
+CMD fdispatcher

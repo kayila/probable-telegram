@@ -2,7 +2,7 @@
 set -e
 
 rm -rf build
-docker build . -t kayila/watchdog
-docker create --name asdf kayila/watchdog
+docker build . -t kayila/fdispatcher
+docker create --name asdf kayila/fdispatcher
 docker cp asdf:/usr/local/bin/ ./build
 docker rm asdf
