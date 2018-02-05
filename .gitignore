@@ -1,2 +1,3 @@
 fdispatcher/build
+*.o
 *~
