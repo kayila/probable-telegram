@@ -5,7 +5,6 @@
 
 class StreamingSidecarRunner: public SidecarRunner {
     public:
-        int run(FunctionParams params); // TODO: use SidecarRunner::run()
         int runFunc(FunctionParams params);
 };
 

@@ -1,5 +1,5 @@
 SOURCES=$(wildcard *.cpp) $(wildcard */*.cpp)
-OBJECTS=main.o runner/StreamingSidecarRunner.o runner/FunctionParams.o
+OBJECTS=main.o runner/StreamingSidecarRunner.o runner/SidecarRunner.o runner/FunctionParams.o
 INCLUDES=-I.
 
 CC=g++
@@ -14,6 +14,10 @@ build/fdispatch: dirs $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o build/fdispatch
 
 %.o: src/main/%.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+runner/SidecarRunner.o: src/main/runner/SidecarRunner.cpp
+	mkdir -p runner
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 runner/StreamingSidecarRunner.o: src/main/runner/StreamingSidecarRunner.cpp
