@@ -8,7 +8,7 @@ int main() {
     std::cout << "Woof" << std::endl;
     std::map<std::string, std::string> map;
     FunctionParams param(map, std::cin, std::cout);
-    StreamingSidecarRunner ssr;//();
+    StreamingSidecarRunner ssr;
 
     ssr.run(param);
     return 0;
