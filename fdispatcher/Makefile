@@ -16,20 +16,9 @@ build/fdispatch: dirs $(OBJECTS)
 %.o: src/main/%.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-runner/SidecarRunner.o: src/main/runner/SidecarRunner.cpp
+runner/%.o: src/main/runner/%.cpp
 	mkdir -p runner
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
-
-runner/StreamingSidecarRunner.o: src/main/runner/StreamingSidecarRunner.cpp
-	mkdir -p runner
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
-
-runner/FunctionParams.o: src/main/runner/FunctionParams.cpp
-	mkdir -p runner
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
-
-#all:
-#	$(CC) $(CFLAGS) ${SOURCES} -o build/fdispatcher
 
 clean:
 	find -name '*.o' -delete
