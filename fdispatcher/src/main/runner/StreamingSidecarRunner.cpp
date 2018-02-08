@@ -25,13 +25,14 @@ int StreamingSidecarRunner::runFunc(FunctionParams params) {
     int childout[2];
     int childerr[2];
 
-    std::cout << "hi!" << std::endl;
     // Create the pipes
     pipe(childin);
     pipe(childout);
     pipe(childerr);
 
-    pid_t pid = fork(); // TODO: Move declaration?
+    // Connect FunctionParams to pipes
+
+    pid_t pid = fork();
 
     if(pid == 0) {
         // Store the command to run
@@ -40,8 +41,8 @@ int StreamingSidecarRunner::runFunc(FunctionParams params) {
 
         // Change stdin/out/err FD to the pipes above
         dup2(childin[1], STDIN_FILENO);
-        //dup2(childout[0], STDOUT_FILENO);
-        //dup2(childerr[0], STDERR_FILENO);
+        dup2(childout[0], STDOUT_FILENO);
+        dup2(childerr[0], STDERR_FILENO);
 
         // Close FD not needed by the child
         close(childin[0]);
@@ -56,16 +57,17 @@ int StreamingSidecarRunner::runFunc(FunctionParams params) {
 
         // Parse the command string into array of null terminated strings
         const char* delim = " ";
-        std::vector<char*> cmdstr = split(cmd, delim);
-        cmdstr.push_back(NULL);
+        std::vector<char*> cmdvec = split(cmd, delim);
+        cmdvec.push_back(NULL); // Required for the execvpe below
 
-        char **cmdarr = cmdstr.data();
-
-        std::cout << "Command is called: " << cmdarr[0] << std::endl;
+        char **cmdarr = cmdvec.data();
 
         execvp(cmdarr[0], cmdarr); // , envp);
     } else if (pid > 0) {
-        // Nothing to do
+        // Close unneeded FD for the parent
+        close(childin[0]);
+        close(childout[1]);
+        close(childerr[1]);
     } else {
         std::cout << "fork() failed!" << std::endl;
     }
