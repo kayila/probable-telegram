@@ -24,18 +24,19 @@ void print_error(const char *file, int line) {
 
 void cleanup() {
     // Don't call close() unless the socket was actually opened.
-    if (server_fd != -1) {
+   if (server_fd != -1) {
         close(server_fd);
     }
 }
 
 bool handle_request(int client_fd) {
-    char buffer[256];
+    const int buffer_size = 4096; /* ARBITRARY: 4KB buffer. */
+    char buffer[buffer_size];
     ssize_t bytes_read;
     ssize_t bytes_written;
 
-    memset(buffer, 0, 256);
-    bytes_read = read(client_fd, buffer, 255);
+    memset(buffer, 0, buffer_size);
+    bytes_read = read(client_fd, buffer, buffer_size - 1);
 
     if (bytes_read < 0) {
         print_error(__FILE__, __LINE__);
@@ -92,6 +93,8 @@ int main(int argc, char *argv[]) {
 
         handle_request(client_fd);
     }
+
+    cleanup();
 
     return 0;
 }
