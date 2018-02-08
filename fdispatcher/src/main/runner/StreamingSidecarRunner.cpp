@@ -1,7 +1,74 @@
 #include "StreamingSidecarRunner.h"
+#include <cstdlib>
+#include <cstring>
+#include <unistd.h>
 #include <iostream>
+#include <vector>
+
+std::vector<char*> split(const std::string &str, const char *delimiter) {
+    std::vector<char*> output;
+    char *input = new char[str.length()+1];
+    std::strcpy(input, str.c_str());
+    char *token = std::strtok(input, delimiter);
+    while (token != NULL) {
+        output.push_back(token);
+        token = std::strtok(NULL, delimiter);
+    }
+    return output;
+}
 
 int StreamingSidecarRunner::runFunc(FunctionParams params) {
+    // Declare the pipes for the child process to control
+    // var[0] = read end of the pipe
+    // var[1] = write end of the pipe
+    int childin[2];
+    int childout[2];
+    int childerr[2];
+
     std::cout << "hi!" << std::endl;
+    // Create the pipes
+    pipe(childin);
+    pipe(childout);
+    pipe(childerr);
+
+    pid_t pid = fork(); // TODO: Move declaration?
+
+    if(pid == 0) {
+        // Store the command to run
+        const char* cmd = std::getenv("FCOMMAND");
+        std::cout << "Going to run command: " << cmd << std::endl;
+
+        // Change stdin/out/err FD to the pipes above
+        dup2(childin[1], STDIN_FILENO);
+        //dup2(childout[0], STDOUT_FILENO);
+        //dup2(childerr[0], STDERR_FILENO);
+
+        // Close FD not needed by the child
+        close(childin[0]);
+        close(childin[1]);
+        close(childout[0]);
+        close(childout[1]);
+        close(childerr[0]);
+        close(childerr[1]);
+
+        // TODO Set up env
+        //const char* envp[5];
+
+        // Parse the command string into array of null terminated strings
+        const char* delim = " ";
+        std::vector<char*> cmdstr = split(cmd, delim);
+        cmdstr.push_back(NULL);
+
+        char **cmdarr = cmdstr.data();
+
+        std::cout << "Command is called: " << cmdarr[0] << std::endl;
+
+        execvp(cmdarr[0], cmdarr); // , envp);
+    } else if (pid > 0) {
+        // Nothing to do
+    } else {
+        std::cout << "fork() failed!" << std::endl;
+    }
+
     return 0;
 }
