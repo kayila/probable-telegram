@@ -36,10 +36,10 @@ void DispatchServer::_global_setup() {
 
 void DispatchServer::printError(const char *file, int line) {
     int buflen = 256;
-    char msg[256];
+    char msg[buflen];
 
     strerror_r(errno, (char*)&msg, buflen);
-    fprintf(stderr, "Error: %s at %s:%i.\r\n", (char*)&msg, file, line);
+    fprintf(stderr, "Error(%i): %s at %s:%i.\r\n", errno, (char*)&msg, file, line);
 }
 
 bool DispatchServer::handleRequest(int clientFd) {
