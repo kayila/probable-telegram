@@ -22,7 +22,7 @@ void DispatchServer::SignalHandler(int sig) {
 }
 
 void DispatchServer::_global_setup() {
-    // If already done the global initialization, bail immediately.
+    // If we've already done the global initialization, bail immediately.
     if (dispatchServerInitialized == true) {
         return;
     }
@@ -112,7 +112,6 @@ void DispatchServer::mainLoop() {
         }
 
         if (clientFd < 0) {
-
             printError(__FILE__, __LINE__);
             exit(errno);
         }
