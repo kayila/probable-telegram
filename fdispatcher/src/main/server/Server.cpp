@@ -28,7 +28,7 @@ void DispatchServer::_global_setup() {
         return;
     }
 
-    struct sigaction signal_action = {SignalHandler};
+    struct sigaction signal_action = {{SignalHandler}};
 
     dispatchServerInitialized = true;
 
@@ -36,11 +36,21 @@ void DispatchServer::_global_setup() {
 }
 
 void DispatchServer::printError(const char *file, int line) {
-    int buflen = 256;
-    char msg[buflen];
+    const int buffer_size = 256;
 
-    strerror_r(errno, (char*)&msg, buflen);
-    fprintf(stderr, "Error(%i): %s at %s:%i.\r\n", errno, (char*)&msg, file, line);
+#if (_POSIX_C_SOURCE >= 200112L) && ! _GNU_SOURCE
+    char msg[buffer_size];
+    strerror_r(errno, msg, buffer_size);
+#else
+    // The C++ standard library used by g++ and clang++ relies on GNU
+    // extensions. As such, it automatically defines _GNU_SOURCE.
+    // And undefining it breaks the standard library.
+    // Thus, I have to do this garbage.
+    char *msg = NULL;
+    msg = strerror_r(errno, msg, buffer_size);
+#endif
+
+    fprintf(stderr, "error: %s at %s:%i (errno %i).\r\n", msg, file, line, errno);
 }
 
 bool DispatchServer::handleRequest(int clientFd) {
@@ -72,12 +82,11 @@ bool DispatchServer::handleRequest(int clientFd) {
 int DispatchServer::createServer(int port) {
     int serverFd;
 
+    struct in_addr server_inaddr = { /*.s_addr =*/ INADDR_ANY };
     struct sockaddr_in server_addr = {
-        .sin_family = AF_INET,
-        .sin_port   = htons(port),
-        .sin_addr   = (struct in_addr){
-            .s_addr = INADDR_ANY
-        },
+        /*.sin_family =*/ AF_INET,
+        /*.sin_port   =*/ htons(port),
+        /*.sin_addr   =*/ server_inaddr
     };
 
     serverFd = socket(AF_INET, SOCK_STREAM, 0);
