@@ -36,7 +36,9 @@ void DispatchServer::_global_setup() {
 }
 
 void DispatchServer::printError(const char *file, int line) {
-    char buffer[256]; /* ARBITRARY: 256 byte buffer. */
+    // ARBITRARY: 256 byte buffer.
+    // Initialize the entire buffer to NULL bytes, to prevent data leaks.
+    char buffer[256] = {0,};
 
 #if defined(__GLIBC__) && defined(__USE_GNU)
     // HACK: The C++ standard library used by g++ and clang++ relies on
