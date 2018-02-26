@@ -41,7 +41,10 @@ void DispatchServer::printError(const char *file, int line) {
     // Initialize the entire buffer to NULL bytes, to prevent data leaks.
     char buffer[256] = {0,};
 
-    posix_strerror_r(errno, buffer, sizeof(buffer));
+    int result = posix_strerror_r(errno, buffer, sizeof(buffer));
+    if (result < 0) {
+        strcpy(buffer, "Unknown error -- strerror_r() failed");
+    }
 
     fprintf(stderr, "error: %s at %s:%i (errno %i).\r\n", buffer, file, line, errno);
 }
