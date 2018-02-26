@@ -22,6 +22,7 @@ void DispatchServer::SignalHandler(int sig) {
     }
 }
 
+// HACK?: On SIGINT
 void DispatchServer::_global_setup() {
     // If we've already done the global initialization, bail immediately.
     if (dispatchServerInitialized == true) {
@@ -36,14 +37,14 @@ void DispatchServer::_global_setup() {
 }
 
 void DispatchServer::printError(const char *file, int line) {
-    const int buffer_size = 256;
+    const int buffer_size = 256; /* ARBITRARY: 256 byte buffer. */
 
 #if (_POSIX_C_SOURCE >= 200112L) && ! _GNU_SOURCE
     char msg[buffer_size];
     strerror_r(errno, msg, buffer_size);
 #else
-    // The C++ standard library used by g++ and clang++ relies on GNU
-    // extensions. As such, it automatically defines _GNU_SOURCE.
+    // HACK: The C++ standard library used by g++ and clang++ relies on
+    // GNU extensions. As such, it automatically defines _GNU_SOURCE.
     // And undefining it breaks the standard library.
     // Thus, I have to do this garbage.
     char *msg = NULL;
