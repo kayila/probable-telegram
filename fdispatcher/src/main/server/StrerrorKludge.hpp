@@ -1,7 +1,7 @@
 #ifndef DISPATCH_KLUDGE_BUCKET_HPP
 #define DISPATCH_KLUDGE_BUCKET_HPP
 
-#ifdef __GLIBC__
+#if defined(__GLIBC__) && defined(__USE_GNU)
     // HACK: The C++ standard library used by g++ and clang++ relies on
     // GNU extensions. As such, it automatically defines _GNU_SOURCE.
     // And undefining it breaks the standard library.
