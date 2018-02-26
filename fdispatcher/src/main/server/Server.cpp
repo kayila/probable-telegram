@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <signal.h>
 #include "Server.hpp"
+#include "StrerrorKludge.hpp" // for posix_strerror_r().
 
 static bool dispatchServerInitialized = false;
 static bool dispatchServerRunning = true;
@@ -40,17 +41,7 @@ void DispatchServer::printError(const char *file, int line) {
     // Initialize the entire buffer to NULL bytes, to prevent data leaks.
     char buffer[256] = {0,};
 
-#if defined(__GLIBC__) && defined(__USE_GNU)
-    // HACK: The C++ standard library used by g++ and clang++ relies on
-    // GNU extensions. As such, it automatically defines _GNU_SOURCE.
-    // And undefining it breaks the standard library.
-    // Thus, I have to do this garbage.
-    strncpy(buffer,
-            strerror_r(errno, buffer, sizeof(buffer)),
-            sizeof(buffer));
-#else
-    strerror_r(errno, buffer, sizeof(buffer));
-#endif
+    posix_strerror_r(errno, buffer, sizeof(buffer));
 
     fprintf(stderr, "error: %s at %s:%i (errno %i).\r\n", buffer, file, line, errno);
 }
