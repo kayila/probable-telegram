@@ -36,21 +36,21 @@ void DispatchServer::_global_setup() {
 }
 
 void DispatchServer::printError(const char *file, int line) {
-    const int buffer_size = 256; /* ARBITRARY: 256 byte buffer. */
+    char buffer[256]; /* ARBITRARY: 256 byte buffer. */
 
 #if defined(__GLIBC__) && defined(__USE_GNU)
     // HACK: The C++ standard library used by g++ and clang++ relies on
     // GNU extensions. As such, it automatically defines _GNU_SOURCE.
     // And undefining it breaks the standard library.
     // Thus, I have to do this garbage.
-    char *msg = NULL;
-    msg = strerror_r(errno, msg, buffer_size);
+    strncpy(buffer,
+            strerror_r(errno, buffer, sizeof(buffer)),
+            sizeof(buffer));
 #else
-    char msg[buffer_size];
-    strerror_r(errno, msg, buffer_size);
+    strerror_r(errno, buffer, sizeof(buffer));
 #endif
 
-    fprintf(stderr, "error: %s at %s:%i (errno %i).\r\n", msg, file, line, errno);
+    fprintf(stderr, "error: %s at %s:%i (errno %i).\r\n", buffer, file, line, errno);
 }
 
 bool DispatchServer::handleRequest(int clientFd) {
