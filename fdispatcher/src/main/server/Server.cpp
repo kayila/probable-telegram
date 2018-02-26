@@ -22,7 +22,6 @@ void DispatchServer::SignalHandler(int sig) {
     }
 }
 
-// HACK?: On SIGINT
 void DispatchServer::_global_setup() {
     // If we've already done the global initialization, bail immediately.
     if (dispatchServerInitialized == true) {
