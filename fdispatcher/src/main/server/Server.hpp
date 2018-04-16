@@ -7,6 +7,7 @@ public:
     ~DispatchServer();
     void mainLoop();
     void stop();
+    std::vector<String, String> parseRequest(char *request);
 private:
     void printError(const char *file, int line);
     bool handleRequest(int client_fd);

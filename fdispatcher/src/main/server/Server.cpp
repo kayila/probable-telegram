@@ -49,6 +49,10 @@ void DispatchServer::printError(const char *file, int line) {
     fprintf(stderr, "error: %s at %s:%i (errno %i).\r\n", buffer, file, line, errno);
 }
 
+std::vector<String, String> DispatchServer::parseRequest(char *request) {
+    //
+}
+
 bool DispatchServer::handleRequest(int clientFd) {
     const int buffer_size = 4096; /* ARBITRARY: 4KB buffer. */
     char buffer[buffer_size];
