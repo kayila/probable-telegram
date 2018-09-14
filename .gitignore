@@ -1,3 +1,4 @@
 fdispatcher/build
 *.o
 *~
+*.swp

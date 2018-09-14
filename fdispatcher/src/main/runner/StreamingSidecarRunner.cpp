@@ -45,12 +45,11 @@ int StreamingSidecarRunner::runFunc(FunctionParams params) {
         dup2(childerr[0], STDERR_FILENO);
 
         // Close FD not needed by the child
-        close(childin[0]);
-        close(childin[1]);
-        close(childout[0]);
-        close(childout[1]);
-        close(childerr[0]);
-        close(childerr[1]);
+        for (int x=0; x<2; x++) {
+            close(childin[x]);
+            close(childout[x]);
+            close(childerr[x]);
+        }
 
         // TODO Set up env
         //const char* envp[5];
