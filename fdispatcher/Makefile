@@ -1,5 +1,5 @@
 SOURCES=$(wildcard *.cpp) $(wildcard */*.cpp)
-OBJECTS=main.o runner/StreamingSidecarRunner.o runner/SidecarRunner.o runner/FunctionParams.o
+OBJECTS=main.o runner/StreamingSidecarRunner.o runner/SidecarRunner.o runner/FunctionParams.o headertoobigexception.o Line.o
 INCLUDES=-I.
 
 CC=g++
