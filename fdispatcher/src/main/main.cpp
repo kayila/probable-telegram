@@ -17,6 +17,13 @@
 #define POLLTIMEOUT 5
 #define HEADERMAXSIZE 8192
 
+// Checks a char buffer for two newlines
+// b = buffer, x = position, o = offset
+#define NLNL(b, x, o) (b[x-o] == '\n' && b[x-o-1] == '\n')
+// Checks a char buffer for CRNL
+// b = buffer, x = position, o = offset
+#define NLCR(b, x, o) (b[x-o] == '\n' && b[x-o-1] == '\r')
+
 static volatile sig_atomic_t terminate = 0;
 
 void die(std::string msg) {
@@ -62,8 +69,10 @@ Line* findLine(char *buf, int size, int pos) {
     }
     for (int x=pos; x < size; x++) {
         if (buf[x] == '\n'
-                && buf[x-1] == '\r') {
-            Line* ret = new Line(x - start - 1);
+            ) {
+                unsigned int length = x-start;
+                length -= (x > 0 && buf[x-1] == '\r') ? 1 : 0;
+            Line* ret = new Line(length);
             ret->start(start)->end(x)->line(buf+start)->found(true);
             return ret;
         } else if (buf[x] == 0) {
@@ -80,14 +89,9 @@ void readFullHeader(int sockfd, char* buffer, int bufsize) {
         // Maybe poll here
         // TODO Handle socket close
         read(sockfd, buffer+x, 1);
-        if (buffer[x] == '\n'
-                && x > 3) {
-            if (buffer[x-1] == '\r'
-                    && buffer[x-2] == '\n'
-                    && buffer[x-3] == '\r' ) {
-                // \r\n\r\n
-                return;
-            }
+        if ( (x>0 && NLNL(buffer, x, 0))
+                || (x>2 && NLCR(buffer, x, 0) && NLCR(buffer, x, 2))) {
+            return;
         }
     }
     throw HeaderTooBigException();
@@ -147,10 +151,8 @@ FunctionParams parseParams(int sockfd) {
             envMap[headerName] = headerValue;
         }
         //printf("start: %d\nend: %d\n", linepos.start, linepos.end);
-        // if (pos == -1)
-        //     break;
-        if (line->found())
-            printf("==%.*s==\n", line->length(), line->line());
+        if (fullLine.size() > 0)
+            printf("==%s==\n", fullLine.c_str());
     };
 
 
