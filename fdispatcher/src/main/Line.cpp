@@ -7,34 +7,38 @@ Line::Line(unsigned int x) {
     mEnd = 0;
     mFound = false;
     mLength = x;
-    mLine = (char*) malloc(mLength * sizeof(char*));
+    if (mLength > 0) {
+        mLine = (char*) malloc(mLength * sizeof(char*));
+    }
 }
 
 Line::~Line() {
-    free(mLine);
+    if (mLength > 0) {
+        free(mLine);
+    }
 }
 
-Line* Line::start(unsigned int x) {
+Line& Line::start(unsigned int x) {
     mStart = x;
-    return this;
+    return *this;
 }
 
 unsigned int Line::start() {
     return mStart;
 }
 
-Line* Line::end(unsigned int x) {
+Line& Line::end(unsigned int x) {
     mEnd = x;
-    return this;
+    return *this;
 }
 
 unsigned int Line::end() {
     return mEnd;
 }
 
-Line* Line::found(bool x) {
+Line& Line::found(bool x) {
     mFound = x;
-    return this;
+    return *this;
 }
 
 bool Line::found() {
@@ -45,16 +49,16 @@ unsigned int Line::length() {
     return mLength;
 }
 
-Line* Line::line(char* x) {
+Line& Line::line(char* x) {
     return line(x, mLength);
 }
 
-Line* Line::line(char* x, unsigned int size) {
+Line& Line::line(char* x, unsigned int size) {
     if (size > mLength) {
         throw std::length_error("Size is too large for this line");
     }
     strncpy(mLine, x, size);
-    return this;
+    return *this;
 }
 
 char* Line::line() {

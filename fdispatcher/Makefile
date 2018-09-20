@@ -3,7 +3,7 @@ OBJECTS=main.o runner/StreamingSidecarRunner.o runner/SidecarRunner.o runner/Fun
 INCLUDES=-I.
 
 CC=g++
-CFLAGS=-static -Wall
+CFLAGS=-static -Wall -g
 
 all: build/fdispatch
 

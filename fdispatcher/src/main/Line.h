@@ -5,15 +5,15 @@ class Line {
     public:
         Line(unsigned int x);
         ~Line();
-        Line* start(unsigned int x);
+        Line& start(unsigned int x);
         unsigned int start();
-        Line* end(unsigned int x);
+        Line& end(unsigned int x);
         unsigned int end();
-        Line* found(bool x);
+        Line& found(bool x);
         bool found();
         unsigned int length();
-        Line* line(char* x);
-        Line* line(char* x, unsigned int size);
+        Line& line(char* x);
+        Line& line(char* x, unsigned int size);
         char* line();
     private:
         unsigned int mStart;

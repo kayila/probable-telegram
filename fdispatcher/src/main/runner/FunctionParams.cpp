@@ -1,9 +1,15 @@
 #include "FunctionParams.h"
 
-FunctionParams::FunctionParams(std::map<std::string, std::string> &envmap, std::istream &instream, std::ostream &outstream) {
+FunctionParams::FunctionParams(int& sockfd, std::map<std::string, std::string> &envmap) {
     env = envmap;
+    /*
     input = &instream;
     output = &outstream;
+    */
+}
+
+FunctionParams::~FunctionParams() {
+    delete(&env);
 }
 
 std::map<std::string, std::string> FunctionParams::getEnv() {

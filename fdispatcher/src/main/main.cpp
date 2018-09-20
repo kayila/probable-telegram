@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 #include <map>
 #include <netinet/in.h>
@@ -59,32 +60,32 @@ std::string trim(const std::string &s) {
  * size - size of the character buffer.
  * pos - position to start the search.
  */
-Line* findLine(char *buf, int size, int pos) {
+Line& findLine(char *buf, int size, int pos) {
     int start = pos;
 
     if (pos == 0)
         pos = 1;
     if (pos>=size) {
-        return new Line(0);
+        return *new Line(0);
     }
     for (int x=pos; x < size; x++) {
         if (buf[x] == '\n'
             ) {
                 unsigned int length = x-start;
                 length -= (x > 0 && buf[x-1] == '\r') ? 1 : 0;
-            Line* ret = new Line(length);
-            ret->start(start)->end(x)->line(buf+start)->found(true);
+            Line& ret = *new Line(length);
+            ret.start(start).end(x).line(buf+start).found(true);
             return ret;
         } else if (buf[x] == 0) {
-            return new Line(0);
+            return *new Line(0);
         }
     }
-    return new Line(0);
+    return *new Line(0);
 }
 
 
 void readFullHeader(int sockfd, char* buffer, int bufsize) {
-    bzero(buffer, bufsize);
+    std::memset(buffer, 0, bufsize);
     for (int x=0; x<bufsize; x++) {
         // Maybe poll here
         // TODO Handle socket close
@@ -97,8 +98,9 @@ void readFullHeader(int sockfd, char* buffer, int bufsize) {
     throw HeaderTooBigException();
 }
 
-FunctionParams parseParams(int sockfd) {
-    std::map<std::string, std::string> envMap;
+FunctionParams& parseParams(int sockfd) {
+    auto& envMap = *new std::map<std::string, std::string>();
+    //std::map<std::string, std::string>
 
     // read header
     char buffer[HEADERMAXSIZE];
@@ -113,29 +115,33 @@ FunctionParams parseParams(int sockfd) {
     // read the next line, if it's a space, append it to the previousy one and update position to end
     // if it does not start with a space, drop it and don't update position
 
-    Line* requestLine = findLine(buffer, HEADERMAXSIZE, 0);
-    unsigned int pos = requestLine->end() + 1;
+    Line& requestLine = findLine(buffer, HEADERMAXSIZE, 0);
+    unsigned int pos = requestLine.end() + 1;
     while(true) {
         std::string fullLine("");
-        Line* line = findLine(buffer, HEADERMAXSIZE, pos);
-        if (!line->found())
+        Line& line = findLine(buffer, HEADERMAXSIZE, pos);
+        if (!line.found())
             break;
-        pos = line->end() + 1;
-        fullLine.append(line->line(), line->length());
+        pos = line.end() + 1;
+        fullLine.append(line.line(), line.length());
 
         // Read ahead for additional lines
         while(true) {
-            line = findLine(buffer, HEADERMAXSIZE, line->end()+1);
-            if (line->found() && line->length() > 0
-                    && (line->line()[0] == ' '
-                        || line->line()[0] == '\t')
+            int end=line.end();
+            delete(&line);
+            line = findLine(buffer, HEADERMAXSIZE, end+1);
+            if (line.found() && line.length() > 0
+                    && (line.line()[0] == ' '
+                        || line.line()[0] == '\t')
                     ) {
-                fullLine.append(line->line(), line->length());
-                pos = line->end() + 1;
+                fullLine.append(line.line(), line.length());
+                pos = line.end() + 1;
             } else {
                 break;
             }
         }
+        // Memory leak?
+        //delete(&line);
 
         // TODO Compress whitespace
 
@@ -156,22 +162,17 @@ FunctionParams parseParams(int sockfd) {
     };
 
 
-    std::cout << requestLine->line() << std::endl;
+    std::cout << requestLine.line() << std::endl;
     for (auto it = envMap.begin(); it != envMap.end(); it++) {
         std::cout << it->first << "=>" << it->second << std::endl;
     }
-    //pos = fullHeader.find('\r\n', pos);
-
-    /*
-    FunctionParams fp;
+    FunctionParams& fp = *new FunctionParams(sockfd, envMap);
     return fp;
-    */
-
 }
+
 int main() {
     std::cout << "Woof" << std::endl;
     std::map<std::string, std::string> map;
-    FunctionParams param(map, std::cin, std::cout);
     StreamingSidecarRunner ssr;
 
     // Ignore dieing children threads
@@ -184,7 +185,7 @@ int main() {
     if (sockfd < 0) {
         die("Could not open socket");
     }
-    bzero((char *) &serv_addr, sizeof(serv_addr));
+    std::memset((char *) &serv_addr, 0, sizeof(serv_addr));
     portno = PORT;
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
@@ -215,7 +216,7 @@ int main() {
         if (pid == 0) {
             // Child process
             close(sockfd); // Close parent listening socket
-            parseParams(newsockfd);
+            FunctionParams& fp = parseParams(newsockfd);
             write(newsockfd, "Hewwo.\n", 7);
             close(newsockfd);
             break;

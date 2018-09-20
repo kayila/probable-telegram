@@ -7,11 +7,13 @@
 
 class FunctionParams {
     public:
-        FunctionParams(std::map<std::string, std::string>&, std::istream&, std::ostream&);
+        FunctionParams(int& sockfd, std::map<std::string, std::string>&);
+        ~FunctionParams();
         std::map<std::string, std::string> getEnv();
         std::istream *getInput();
         std::ostream *getOutput();
     private:
+        int sockfd;
         std::map<std::string, std::string> env;
         std::istream *input;
         std::ostream *output;
